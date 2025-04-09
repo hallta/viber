@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-100">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,117 +15,100 @@
     <!-- Application CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-        <div class="container-fluid">
-            <!-- Brand -->
-            <a class="navbar-brand" href="/">Viber</a>
-            
-            <!-- Mobile Toggle Button -->
-            <button class="navbar-toggler" 
-                    type="button" 
-                    data-bs-toggle="collapse" 
-                    data-bs-target="#navbarNav" 
-                    aria-controls="navbarNav" 
-                    aria-expanded="false" 
-                    aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <!-- Navigation Links -->
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    {# Home Link #}
-                    <li class="nav-item">
-                        <a class="nav-link {% if active_page == 'home' %}active{% endif %}" 
-                           href="/" 
-                           {% if active_page == 'home' %}aria-current="page"{% endif %}>
-                            Home
-                        </a>
-                    </li>
-                    
-                    {# About Link #}
-                    <li class="nav-item">
-                        <a class="nav-link {% if active_page == 'about' %}active{% endif %}" 
-                           href="/about"
-                           {% if active_page == 'about' %}aria-current="page"{% endif %}>
-                            About
-                        </a>
-                    </li>
-                    
-                    {# Contact Link #}
-                    <li class="nav-item">
-                        <a class="nav-link {% if active_page == 'contact' %}active{% endif %}" 
-                           href="/contact"
-                           {% if active_page == 'contact' %}aria-current="page"{% endif %}>
-                            Contact
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if active_page == 'products' %}active{% endif %}" 
-                           href="{{ url_for('products') }}"
-                           {% if active_page == 'products' %}aria-current="page"{% endif %}>
-                            Products
-                        </a>
-                    </li>
-                </ul>
-                
-                <!-- Cart and Authentication Links -->
-                <ul class="navbar-nav">
-                    {% if session.get('authenticated') %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if active_page == 'cart' %}active{% endif %} position-relative" 
-                           href="{{ url_for('view_cart') }}"
-                           {% if active_page == 'cart' %}aria-current="page"{% endif %}>
-                            <i class="bi bi-cart"></i> Cart
-                            {% if cart_count > 0 %}
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                {{ cart_count }}
-                            </span>
-                            {% endif %}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <span class="nav-link">Welcome, {{ session.get('username') }}!</span>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
-                    </li>
-                    {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if active_page == 'login' %}active{% endif %}" 
-                           href="{{ url_for('login') }}"
-                           {% if active_page == 'login' %}aria-current="page"{% endif %}>
-                            Login
-                        </a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Flash Messages -->
-    <div class="container mt-4">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<body class="d-flex flex-column h-100">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="{{ url_for('home') }}">Viber</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link {% if active_page == 'home' %}active{% endif %}" 
+                               href="{{ url_for('home') }}"
+                               {% if active_page == 'home' %}aria-current="page"{% endif %}>
+                                Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if active_page == 'about' %}active{% endif %}"
+                               href="{{ url_for('about') }}"
+                               {% if active_page == 'about' %}aria-current="page"{% endif %}>
+                                About
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if active_page == 'contact' %}active{% endif %}"
+                               href="{{ url_for('contact') }}"
+                               {% if active_page == 'contact' %}aria-current="page"{% endif %}>
+                                Contact
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if active_page == 'products' %}active{% endif %}" 
+                               href="{{ url_for('products') }}"
+                               {% if active_page == 'products' %}aria-current="page"{% endif %}>
+                                Products
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="navbar-nav">
+                        {% if session.get('authenticated') %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if active_page == 'cart' %}active{% endif %}"
+                               href="{{ url_for('view_cart') }}"
+                               {% if active_page == 'cart' %}aria-current="page"{% endif %}>
+                                Cart {% if session.get('cart_count', 0) > 0 %}
+                                <span class="badge bg-primary">{{ session.get('cart_count', 0) }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <span class="navbar-text me-3">Welcome, {{ session.get('username') }}!</span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                        </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if active_page == 'login' %}active{% endif %}"
+                               href="{{ url_for('login') }}"
+                               {% if active_page == 'login' %}aria-current="page"{% endif %}>
+                                Login
+                            </a>
+                        </li>
+                        {% endif %}
                     </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-    </div>
+                </div>
+            </div>
+        </nav>
+        <div class="container mt-3">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+    </header>
 
-    <!-- Main Content Area -->
-    <div class="content-wrapper">
-        {% block content %}
-        {# Page content will be inserted here #}
-        {% endblock %}
-    </div>
+    <main class="flex-shrink-0">
+        <div class="container mt-4">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">&copy; 2024 Viber. All rights reserved.</span>
+        </div>
+    </footer>
 
     <!-- Third-party JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
