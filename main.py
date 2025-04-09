@@ -87,13 +87,11 @@ def home() -> str:
     return render_template_with_nav('index.html', active_page='home')
 
 @app.route('/about')
-@login_required
 def about() -> str:
     """Render the about page."""
     return render_template_with_nav('about.html', active_page='about')
 
 @app.route('/contact')
-@login_required
 def contact() -> str:
     """Render the contact page."""
     return render_template_with_nav('contact.html', active_page='contact')

@@ -6,7 +6,7 @@ A Flask web application with authentication, navigation, and responsive design.
 
 - User authentication system
 - Responsive navigation bar
-- Protected routes
+- Selective route protection
 - Bootstrap-based UI
 - Flash messages for user feedback
 - Session management
@@ -48,14 +48,15 @@ Note: If you see a port conflict on the default port (5000), the command above e
 The application implements a basic authentication system:
 
 ### Features
-- Login required for all pages
+- Login required for the home page
+- Public access to About and Contact pages
 - Session-based authentication
-- Automatic redirect to login page
+- Automatic redirect to login page when accessing protected routes
 - "Remember where you came from" - redirects back to originally requested page after login
 
 ### Usage
-1. Visit any page while not logged in
-2. You'll be redirected to the login page
+1. The About and Contact pages are publicly accessible
+2. Visiting the home page while not logged in will redirect to the login page
 3. Enter any username and password (all credentials are accepted in this version)
 4. After login, you'll be redirected to your original destination
 5. Use the logout button in the navigation bar to end your session
@@ -89,7 +90,7 @@ The test suite includes tests for:
 - Authentication functionality
   - Login success/failure
   - Logout
-  - Protected routes
+  - Protected vs public routes
   - Session management
 - Route functionality for all pages
 - Template rendering and context
@@ -116,9 +117,9 @@ viber/
 ├── main.py                # Main Flask application
 ├── templates/             # HTML templates directory
 │   ├── base.html         # Base template with navigation
-│   ├── index.html        # Home page template
-│   ├── about.html        # About page template
-│   ├── contact.html      # Contact page template
+│   ├── index.html        # Home page template (protected)
+│   ├── about.html        # About page template (public)
+│   ├── contact.html      # Contact page template (public)
 │   └── login.html        # Login page template
 ├── static/               # Static files directory
 │   └── css/             # CSS files directory
