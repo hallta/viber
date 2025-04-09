@@ -1,36 +1,37 @@
-# Ignore everything
-*
-
-# But not these files...
-!.gitignore
-!requirements.txt
-!main.py
-!README.md
-!templates/
-!templates/*.html
-!static/
-!static/css/
-!static/css/*.css
-!tests/
-!tests/__init__.py
-!tests/test_*.py
-!pytest.ini
-
-# Ignore virtual environment
-venv/
-
-# Python specific
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-.env
-.venv
-env/
-ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Test specific
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing
 .pytest_cache/
 .coverage
 htmlcov/
@@ -38,17 +39,40 @@ htmlcov/
 .nox/
 coverage.xml
 *.cover
-*.py,cover
 .hypothesis/
 .pytest_cache/
-cover/
+coverage/
 
-# IDE specific
-.idea/
-.vscode/
-*.swp
-*.swo
+# Database
+*.db
+*.sqlite3
+*.sqlite
 
-# OS specific
-.DS_Store
-Thumbs.db 
+# Logs
+*.log
+logs/
+log/
+
+# Environment variables
+.env
+.flaskenv
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Explicitly include
+!requirements.txt
+!setup.py
+!pyproject.toml
+!README.md
+!LICENSE
+!src/viber/**/*.py
+!tests/**/*.py
+!templates/**/*.html
+!static/**/*.css
+!static/**/*.js
+
+# But still ignore cache in included directories
+src/viber/**/__pycache__/
+tests/**/__pycache__/ 
