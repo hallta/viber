@@ -19,7 +19,7 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                <a class="navbar-brand" href="{{ url_for('home') }}">Viber</a>
+                <a class="navbar-brand" href="{{ url_for('pages.home') }}">Viber</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -27,28 +27,28 @@
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
                             <a class="nav-link {% if active_page == 'home' %}active{% endif %}" 
-                               href="{{ url_for('home') }}"
+                               href="{{ url_for('pages.home') }}"
                                {% if active_page == 'home' %}aria-current="page"{% endif %}>
                                 Home
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {% if active_page == 'about' %}active{% endif %}"
-                               href="{{ url_for('about') }}"
+                               href="{{ url_for('pages.about') }}"
                                {% if active_page == 'about' %}aria-current="page"{% endif %}>
                                 About
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {% if active_page == 'contact' %}active{% endif %}"
-                               href="{{ url_for('contact') }}"
+                               href="{{ url_for('pages.contact') }}"
                                {% if active_page == 'contact' %}aria-current="page"{% endif %}>
                                 Contact
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {% if active_page == 'products' %}active{% endif %}" 
-                               href="{{ url_for('products') }}"
+                               href="{{ url_for('pages.products') }}"
                                {% if active_page == 'products' %}aria-current="page"{% endif %}>
                                 Products
                             </a>
@@ -58,7 +58,7 @@
                         {% if session.get('authenticated') %}
                         <li class="nav-item">
                             <a class="nav-link {% if active_page == 'cart' %}active{% endif %}"
-                               href="{{ url_for('view_cart') }}"
+                               href="{{ url_for('cart.view_cart') }}"
                                {% if active_page == 'cart' %}aria-current="page"{% endif %}>
                                 Cart {% if session.get('cart_count', 0) > 0 %}
                                 <span class="badge bg-primary">{{ session.get('cart_count', 0) }}</span>
@@ -68,13 +68,19 @@
                         <li class="nav-item">
                             <span class="navbar-text me-3">Welcome, {{ session.get('username') }}!</span>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                Logout
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('auth.logout_and_clear_cart') }}">Logout & Clear Cart</a></li>
+                            </ul>
                         </li>
                         {% else %}
                         <li class="nav-item">
                             <a class="nav-link {% if active_page == 'login' %}active{% endif %}"
-                               href="{{ url_for('login') }}"
+                               href="{{ url_for('auth.login') }}"
                                {% if active_page == 'login' %}aria-current="page"{% endif %}>
                                 Login
                             </a>

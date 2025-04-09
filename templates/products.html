@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Our Hat Collection</h1>
         {% if session.get('authenticated') %}
-        <a href="{{ url_for('view_cart') }}" class="btn btn-outline-primary position-relative">
+        <a href="{{ url_for('cart.view_cart') }}" class="btn btn-outline-primary position-relative">
             <i class="bi bi-cart"></i> Cart
             {% if cart_count > 0 %}
             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -37,7 +37,7 @@
                         Add to Cart
                     </button>
                     {% else %}
-                    <a href="{{ url_for('login', next=url_for('view_cart')) }}" class="btn btn-primary w-100">
+                    <a href="{{ url_for('auth.login', next=url_for('cart.view_cart')) }}" class="btn btn-primary w-100">
                         Login to Add to Cart
                     </a>
                     {% endif %}
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     location.reload();
                 } else if (response.status === 401) {
                     // Redirect to login if unauthorized
-                    window.location.href = "{{ url_for('login', next=url_for('view_cart')) }}";
+                    window.location.href = "{{ url_for('auth.login', next=url_for('cart.view_cart')) }}";
                 }
             } catch (error) {
                 console.error('Error adding to cart:', error);

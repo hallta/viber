@@ -1,17 +1,19 @@
 # Viber
 
-A Flask web application featuring a hat store with authentication, product catalog, and responsive design.
+A Flask web application featuring a hat store with authentication, product catalog, shopping cart, and responsive design.
 
 ## Features
 
 - User authentication system
+- Shopping cart functionality with user isolation
 - Responsive navigation bar
 - Product catalog with database integration
 - Bootstrap-based UI
 - Flash messages for user feedback
 - Session management
 - Mobile-friendly design
-- SQLite database for product management
+- SQLite database for product and cart management
+- Docker support for containerized deployment
 
 ## Getting Started
 
@@ -19,6 +21,7 @@ A Flask web application featuring a hat store with authentication, product catal
 - Python 3.x
 - pip (Python package installer)
 - SQLite3 (included with Python)
+- Docker (optional, for containerized deployment)
 
 ### Setup
 
@@ -28,40 +31,81 @@ python3 -m venv venv
 source venv/bin/activate  # On Unix/macOS
 ```
 
-2. Install dependencies:
+2. Install dependencies and the package in development mode:
 ```bash
 pip install -r requirements.txt
+pip install -e .
 ```
+
+3. Initialize the database with sample data:
+```bash
+python -m viber.init_db
+```
+This will:
+- Create all necessary database tables
+- Add sample products if the database is empty
+- Set up the SQLite database in the project root
 
 ### Running the Server
 
-1. Make sure your virtual environment is activated
-2. Run the Flask application:
+There are two ways to run the server:
+
+#### Method 1: Using Flask CLI
 ```bash
-flask --app main run --port 8080
+flask --app wsgi run --port 8080
+```
+
+#### Method 2: Using Python
+```bash
+python wsgi.py
 ```
 
 The server will start on `http://localhost:8080`. You can visit this URL in your web browser.
 
-Note: If you see a port conflict on the default port (5000), the command above explicitly uses port 8080 to avoid conflicts with macOS AirPlay Receiver service.
+Note: Port 8080 is used to avoid conflicts with macOS AirPlay Receiver service which uses port 5000.
 
 ## Authentication
 
 The application implements a basic authentication system:
 
 ### Features
-- Login required for the home page
-- Public access to About, Contact, and Products pages
+- Public access to Home, About, Contact, and Products pages
+- Protected cart functionality requiring login
 - Session-based authentication
 - Automatic redirect to login page when accessing protected routes
 - "Remember where you came from" - redirects back to originally requested page after login
+- Cart persistence across sessions
+- Option to clear cart on logout
 
 ### Usage
-1. The About, Contact, and Products pages are publicly accessible
-2. Visiting the home page while not logged in will redirect to the login page
+1. All main pages (Home, About, Contact, Products) are publicly accessible
+2. Adding items to cart or viewing cart requires authentication
 3. Enter any username and password (all credentials are accepted in this version)
 4. After login, you'll be redirected to your original destination
-5. Use the logout button in the navigation bar to end your session
+5. Use the regular logout to preserve your cart items
+6. Use "Logout & Clear Cart" to remove all items from your cart
+
+## Shopping Cart
+
+The application includes a full-featured shopping cart system:
+
+### Features
+- Add products to cart
+- Update quantities
+- Remove items
+- Cart total calculation
+- Cart persistence across sessions
+- User-isolated carts
+- Cart count badge in navigation
+- AJAX updates for smooth user experience
+
+### Database Schema
+The cart_items table includes:
+- id (Primary Key)
+- session_id (String, links to user)
+- product_id (Integer, Foreign Key to products)
+- quantity (Integer)
+- created_at (DateTime)
 
 ## Product Catalog
 
@@ -86,50 +130,51 @@ The products table includes:
 
 ## Testing
 
-The project includes a comprehensive test suite using Python's unittest framework and pytest.
+The project includes a comprehensive test suite using pytest. Here's how to run the tests:
 
-### Running Tests
-
-Make sure you're in your virtual environment, then you can run tests using either pytest (recommended) or unittest:
-
+### Running All Tests
 ```bash
-# Using pytest (recommended)
+# Run all tests with coverage report
 pytest
 
-# Using unittest
-python -m unittest discover tests
+# Run tests with verbose output
+pytest -v
+```
+
+### Running Specific Tests
+```bash
+# Run tests in a specific file
+pytest tests/test_auth/test_login.py
+
+# Run tests matching a pattern
+pytest -k "test_login"
+
+# Run tests in a specific directory
+pytest tests/test_auth/
 ```
 
 ### Test Coverage
+The test suite includes coverage reporting. When you run `pytest`, it will automatically:
+- Run all tests
+- Generate a coverage report showing which lines of code were executed
+- Display any failing tests with detailed output
 
-The pytest configuration includes coverage reporting. When you run `pytest`, it will:
-- Run all tests with verbose output
-- Generate a coverage report
-- Show which lines aren't covered by tests
+### Understanding Test Output
+- Green dots (.) indicate passing tests
+- 'F' indicates a failing test
+- 'E' indicates an error during test execution
+- The final summary shows:
+  - Number of tests run
+  - Number of failures/errors
+  - Test coverage percentage
+  - Time taken to run tests
 
-### What's Being Tested
-
-The test suite includes tests for:
-- Authentication functionality
-  - Login success/failure
-  - Logout
-  - Protected vs public routes
-  - Session management
-- Route functionality for all pages
-- Template rendering and context
-- 404 error handling
-- Template inheritance
-- Navigation link presence
-- Active page highlighting
-- Proper template context variables
-
-### Adding New Tests
-
-New tests should be added to `tests/test_app.py` and should follow the existing pattern:
-- Use descriptive test method names starting with `test_`
-- Include docstrings explaining what is being tested
-- Group related tests in test classes
-- Use appropriate assertions for different types of checks
+### Troubleshooting Tests
+If tests fail, make sure:
+1. You've installed the package in development mode (`pip install -e .`)
+2. All dependencies are installed (`pip install -r requirements.txt`)
+3. You're running tests from the project root directory
+4. Your virtual environment is activated
 
 ## Project Structure
 
@@ -137,18 +182,29 @@ New tests should be added to `tests/test_app.py` and should follow the existing 
 viber/
 ├── README.md               # Project documentation
 ├── requirements.txt        # Python dependencies
+├── Dockerfile             # Docker configuration
+├── docker-compose.yml     # Docker Compose configuration
 ├── main.py                # Main Flask application
 ├── hats.db                # SQLite database
+├── src/                   # Source code directory
+│   └── viber/            # Main package directory
+│       ├── __init__.py   # Package initialization
+│       ├── models/       # Database models
+│       ├── routes/       # Route blueprints
+│       └── utils/        # Utility functions
 ├── templates/             # HTML templates directory
 │   ├── base.html         # Base template with navigation
-│   ├── index.html        # Home page template (protected)
-│   ├── about.html        # About page template (public)
-│   ├── contact.html      # Contact page template (public)
-│   ├── products.html     # Products page template (public)
+│   ├── index.html        # Home page template
+│   ├── about.html        # About page template
+│   ├── contact.html      # Contact page template
+│   ├── products.html     # Products page template
+│   ├── cart.html         # Shopping cart template
 │   └── login.html        # Login page template
 ├── static/               # Static files directory
-│   └── css/             # CSS files directory
-│       └── style.css    # Main stylesheet
+│   ├── css/             # CSS files directory
+│   │   └── style.css    # Main stylesheet
+│   └── js/              # JavaScript files directory
+│       └── cart.js      # Cart functionality
 ├── tests/               # Test suite directory
 │   ├── __init__.py     # Test package initialization
 │   └── test_app.py     # Application tests
