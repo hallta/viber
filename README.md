@@ -1,6 +1,16 @@
 # Viber
 
-A simple Flask web server that serves a "hello world" page.
+A Flask web application with authentication, navigation, and responsive design.
+
+## Features
+
+- User authentication system
+- Responsive navigation bar
+- Protected routes
+- Bootstrap-based UI
+- Flash messages for user feedback
+- Session management
+- Mobile-friendly design
 
 ## Getting Started
 
@@ -29,9 +39,26 @@ pip install -r requirements.txt
 flask --app main run --port 8080
 ```
 
-The server will start on `http://localhost:8080`. You can visit this URL in your web browser to see the "hello world" message.
+The server will start on `http://localhost:8080`. You can visit this URL in your web browser.
 
 Note: If you see a port conflict on the default port (5000), the command above explicitly uses port 8080 to avoid conflicts with macOS AirPlay Receiver service.
+
+## Authentication
+
+The application implements a basic authentication system:
+
+### Features
+- Login required for all pages
+- Session-based authentication
+- Automatic redirect to login page
+- "Remember where you came from" - redirects back to originally requested page after login
+
+### Usage
+1. Visit any page while not logged in
+2. You'll be redirected to the login page
+3. Enter any username and password (all credentials are accepted in this version)
+4. After login, you'll be redirected to your original destination
+5. Use the logout button in the navigation bar to end your session
 
 ## Testing
 
@@ -59,6 +86,11 @@ The pytest configuration includes coverage reporting. When you run `pytest`, it 
 ### What's Being Tested
 
 The test suite includes tests for:
+- Authentication functionality
+  - Login success/failure
+  - Logout
+  - Protected routes
+  - Session management
 - Route functionality for all pages
 - Template rendering and context
 - 404 error handling
@@ -83,7 +115,11 @@ viber/
 ├── requirements.txt        # Python dependencies
 ├── main.py                # Main Flask application
 ├── templates/             # HTML templates directory
-│   └── index.html        # Main page template
+│   ├── base.html         # Base template with navigation
+│   ├── index.html        # Home page template
+│   ├── about.html        # About page template
+│   ├── contact.html      # Contact page template
+│   └── login.html        # Login page template
 ├── static/               # Static files directory
 │   └── css/             # CSS files directory
 │       └── style.css    # Main stylesheet
