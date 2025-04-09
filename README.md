@@ -26,10 +26,12 @@ pip install -r requirements.txt
 1. Make sure your virtual environment is activated
 2. Run the Flask application:
 ```bash
-python app.py
+flask --app main run --port 8080
 ```
 
 The server will start on `http://localhost:8080`. You can visit this URL in your web browser to see the "hello world" message.
+
+Note: If you see a port conflict on the default port (5000), the command above explicitly uses port 8080 to avoid conflicts with macOS AirPlay Receiver service.
 
 ## Project Structure
 
@@ -37,7 +39,7 @@ The server will start on `http://localhost:8080`. You can visit this URL in your
 viber/
 ├── README.md           # Project documentation
 ├── requirements.txt    # Python dependencies
-├── app.py             # Main Flask application
+├── main.py            # Main Flask application
 └── venv/              # Virtual environment directory
 ```
 
