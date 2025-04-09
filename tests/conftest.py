@@ -12,10 +12,14 @@ def app():
     app = create_app({
         'TESTING': True,
         'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',
-        'WTF_CSRF_ENABLED': False
+        'WTF_CSRF_ENABLED': False,
+        'SECRET_KEY': 'test_secret_key'  # Add secret key for sessions
     })
     
     with app.app_context():
+        # Drop all tables first to ensure clean state
+        db.drop_all()
+        # Create all tables
         db.create_all()
         
         # Add test product
@@ -24,7 +28,16 @@ def app():
             description='A test hat',
             price=29.99,
             image_url='https://test.com/hat.jpg',
-            category='Test'
+            category='T-Shirts',
+            fit='Regular',
+            size='M',
+            color='Black',
+            material='Cotton',
+            style='Casual',
+            season='All-Season',
+            gender='Unisex',
+            in_stock=True,
+            stock_quantity=10
         )
         db.session.add(test_product)
         db.session.commit()

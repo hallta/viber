@@ -39,12 +39,13 @@ pip install -e .
 
 3. Initialize the database with sample data:
 ```bash
-python -m viber.init_db
+PYTHONPATH=/path/to/viber python src/viber/init_db.py
 ```
 This will:
+- Create the instance directory if it doesn't exist
 - Create all necessary database tables
-- Add sample products if the database is empty
-- Set up the SQLite database in the project root
+- Add 100 sample products with diverse attributes
+- Set up the SQLite database in the instance directory
 
 ### Running the Server
 
@@ -52,12 +53,12 @@ There are two ways to run the server:
 
 #### Method 1: Using Flask CLI
 ```bash
-flask --app wsgi run --port 8080
+PYTHONPATH=/path/to/viber FLASK_APP=src.viber:create_app FLASK_ENV=development flask run --port 8080
 ```
 
 #### Method 2: Using Python
 ```bash
-python wsgi.py
+PYTHONPATH=/path/to/viber python wsgi.py
 ```
 
 The server will start on `http://localhost:8080`. You can visit this URL in your web browser.
@@ -109,15 +110,16 @@ The cart_items table includes:
 
 ## Product Catalog
 
-The application includes a product catalog system for our hat store:
+The application includes a product catalog system:
 
 ### Features
 - SQLite database integration
 - Responsive product grid layout
-- Product categories
+- Product categories with diverse attributes
 - Price display
 - Product images
-- Add to cart functionality (UI only in this version)
+- Add to cart functionality
+- Stock management
 
 ### Database Schema
 The products table includes:
@@ -126,7 +128,18 @@ The products table includes:
 - description (Text)
 - price (Float)
 - image_url (String)
-- category (String)
+- category (String) - T-Shirts, Shirts, Pants, etc.
+- fit (String) - Regular, Slim, Relaxed, etc.
+- size (String) - XS, S, M, L, XL, XXL
+- color (String) - Black, White, Navy, etc.
+- material (String) - Cotton, Polyester, Wool, etc.
+- style (String) - Casual, Formal, Sport, etc.
+- season (String) - Spring, Summer, Fall, Winter, All-Season
+- gender (String) - Men, Women, Unisex
+- in_stock (Boolean)
+- stock_quantity (Integer)
+- created_at (DateTime)
+- updated_at (DateTime)
 
 ## Testing
 
@@ -180,36 +193,35 @@ If tests fail, make sure:
 
 ```
 viber/
-├── README.md               # Project documentation
-├── requirements.txt        # Python dependencies
-├── Dockerfile             # Docker configuration
-├── docker-compose.yml     # Docker Compose configuration
-├── main.py                # Main Flask application
-├── hats.db                # SQLite database
-├── src/                   # Source code directory
-│   └── viber/            # Main package directory
-│       ├── __init__.py   # Package initialization
-│       ├── models/       # Database models
-│       ├── routes/       # Route blueprints
-│       └── utils/        # Utility functions
-├── templates/             # HTML templates directory
-│   ├── base.html         # Base template with navigation
-│   ├── index.html        # Home page template
-│   ├── about.html        # About page template
-│   ├── contact.html      # Contact page template
-│   ├── products.html     # Products page template
-│   ├── cart.html         # Shopping cart template
-│   └── login.html        # Login page template
-├── static/               # Static files directory
-│   ├── css/             # CSS files directory
-│   │   └── style.css    # Main stylesheet
-│   └── js/              # JavaScript files directory
-│       └── cart.js      # Cart functionality
-├── tests/               # Test suite directory
-│   ├── __init__.py     # Test package initialization
-│   └── test_app.py     # Application tests
-├── pytest.ini          # Pytest configuration
-└── venv/               # Virtual environment directory
+├── README.md                # Project documentation
+├── requirements.txt         # Python dependencies
+├── Dockerfile              # Docker configuration
+├── docker-compose.yml      # Docker Compose configuration
+├── instance/               # Instance directory for SQLite database
+│   └── viber.db           # SQLite database
+├── src/                    # Source code directory
+│   └── viber/             # Main package directory
+│       ├── __init__.py    # Application factory
+│       ├── extensions.py  # Flask extensions
+│       ├── init_db.py     # Database initialization script
+│       ├── models/        # Database models
+│       │   ├── product.py # Product model
+│       │   └── cart.py    # Cart model
+│       ├── routes/        # Route blueprints
+│       │   ├── auth.py    # Authentication routes
+│       │   ├── cart.py    # Cart routes
+│       │   └── pages.py   # Page routes
+│       └── utils/         # Utility functions
+├── templates/              # HTML templates directory
+│   ├── base.html          # Base template with navigation
+│   ├── index.html         # Home page template
+│   ├── about.html         # About page template
+│   ├── contact.html       # Contact page template
+│   ├── products.html      # Products page template
+│   └── cart.html          # Cart page template
+└── static/                # Static files directory
+    ├── css/              # CSS files
+    └── js/               # JavaScript files
 ```
 
 ## Contributing

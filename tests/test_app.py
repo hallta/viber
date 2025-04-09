@@ -14,7 +14,8 @@ class TestApp(unittest.TestCase):
         self.app = create_app({
             'TESTING': True,
             'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',
-            'WTF_CSRF_ENABLED': False
+            'WTF_CSRF_ENABLED': False,
+            'SECRET_KEY': 'test_secret_key'  # Add secret key for sessions
         })
         self.client = self.app.test_client()
         self.app_context = self.app.app_context()
@@ -27,7 +28,16 @@ class TestApp(unittest.TestCase):
             description='A test hat',
             price=29.99,
             image_url='https://test.com/hat.jpg',
-            category='Test'
+            category='T-Shirts',
+            fit='Regular',
+            size='M',
+            color='Black',
+            material='Cotton',
+            style='Casual',
+            season='All-Season',
+            gender='Unisex',
+            in_stock=True,
+            stock_quantity=10
         )
         db.session.add(test_product)
         db.session.commit()

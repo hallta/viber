@@ -1,55 +1,203 @@
 {% extends "base.html" %}
 
-{% block title %}Products - Viber Hats{% endblock %}
+{% block title %}Products - Viber{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Our Hat Collection</h1>
-        {% if session.get('authenticated') %}
-        <a href="{{ url_for('cart.view_cart') }}" class="btn btn-outline-primary position-relative">
-            <i class="bi bi-cart"></i> Cart
-            {% if cart_count > 0 %}
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                {{ cart_count }}
-            </span>
-            {% endif %}
-        </a>
-        {% endif %}
-    </div>
-    
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        {% for product in products %}
-        <div class="col">
-            <div class="card h-100">
-                <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}">
-                <div class="card-body">
-                    <h5 class="card-title">{{ product.name }}</h5>
-                    <p class="card-text">{{ product.description }}</p>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="badge bg-secondary">{{ product.category }}</span>
-                        <span class="fs-5">${{ "%.2f"|format(product.price) }}</span>
-                    </div>
+    <div class="row">
+        <!-- Filters Sidebar -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Filters</h5>
                 </div>
-                <div class="card-footer">
-                    {% if session.get('authenticated') %}
-                    <button class="btn btn-primary w-100 add-to-cart" data-product-id="{{ product.id }}">
-                        Add to Cart
-                    </button>
-                    {% else %}
-                    <a href="{{ url_for('auth.login', next=url_for('cart.view_cart')) }}" class="btn btn-primary w-100">
-                        Login to Add to Cart
-                    </a>
-                    {% endif %}
+                <div class="card-body">
+                    <form id="filter-form" method="GET">
+                        <!-- Category Filter -->
+                        <div class="mb-3">
+                            <label class="form-label">Category</label>
+                            {% for category in categories %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="category" 
+                                       value="{{ category }}" id="cat-{{ category }}"
+                                       {% if category in selected_filters.get('category', []) %}checked{% endif %}>
+                                <label class="form-check-label" for="cat-{{ category }}">
+                                    {{ category }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Style Filter -->
+                        <div class="mb-3">
+                            <label class="form-label">Style</label>
+                            {% for style in styles %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="style"
+                                       value="{{ style }}" id="style-{{ style }}"
+                                       {% if style in selected_filters.get('style', []) %}checked{% endif %}>
+                                <label class="form-check-label" for="style-{{ style }}">
+                                    {{ style }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Size Filter -->
+                        <div class="mb-3">
+                            <label class="form-label">Size</label>
+                            {% for size in sizes %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="size"
+                                       value="{{ size }}" id="size-{{ size }}"
+                                       {% if size in selected_filters.get('size', []) %}checked{% endif %}>
+                                <label class="form-check-label" for="size-{{ size }}">
+                                    {{ size }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Color Filter -->
+                        <div class="mb-3">
+                            <label class="form-label">Color</label>
+                            {% for color in colors %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="color"
+                                       value="{{ color }}" id="color-{{ color }}"
+                                       {% if color in selected_filters.get('color', []) %}checked{% endif %}>
+                                <label class="form-check-label" for="color-{{ color }}">
+                                    {{ color }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Gender Filter -->
+                        <div class="mb-3">
+                            <label class="form-label">Gender</label>
+                            {% for gender in genders %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="gender"
+                                       value="{{ gender }}" id="gender-{{ gender }}"
+                                       {% if gender in selected_filters.get('gender', []) %}checked{% endif %}>
+                                <label class="form-check-label" for="gender-{{ gender }}">
+                                    {{ gender }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Season Filter -->
+                        <div class="mb-3">
+                            <label class="form-label">Season</label>
+                            {% for season in seasons %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="season"
+                                       value="{{ season }}" id="season-{{ season }}"
+                                       {% if season in selected_filters.get('season', []) %}checked{% endif %}>
+                                <label class="form-check-label" for="season-{{ season }}">
+                                    {{ season }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Price Range -->
+                        <div class="mb-3">
+                            <label class="form-label">Price Range</label>
+                            <div class="input-group mb-2">
+                                <input type="number" class="form-control" name="min_price" 
+                                       placeholder="Min" value="{{ selected_filters.get('min_price', '') }}">
+                                <span class="input-group-text">-</span>
+                                <input type="number" class="form-control" name="max_price"
+                                       placeholder="Max" value="{{ selected_filters.get('max_price', '') }}">
+                            </div>
+                        </div>
+
+                        <!-- Stock Status -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="in_stock"
+                                       value="true" id="in-stock"
+                                       {% if selected_filters.get('in_stock') %}checked{% endif %}>
+                                <label class="form-check-label" for="in-stock">
+                                    In Stock Only
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                        <a href="{{ url_for('pages.products') }}" class="btn btn-outline-secondary w-100 mt-2">Clear Filters</a>
+                    </form>
                 </div>
             </div>
         </div>
-        {% endfor %}
+
+        <!-- Products Grid -->
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Our Collection</h1>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Sort by: {{ sort_by|default('Featured') }}
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('pages.products', sort='price_asc', **selected_filters) }}">Price: Low to High</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('pages.products', sort='price_desc', **selected_filters) }}">Price: High to Low</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('pages.products', sort='name_asc', **selected_filters) }}">Name: A to Z</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('pages.products', sort='name_desc', **selected_filters) }}">Name: Z to A</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for product in products %}
+                <div class="col">
+                    <div class="card h-100">
+                        <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text">{{ product.description }}</p>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-secondary">{{ product.category }}</span>
+                                <span class="fs-5">${{ "%.2f"|format(product.price) }}</span>
+                            </div>
+                            <div class="d-flex flex-wrap gap-1 mb-3">
+                                <span class="badge bg-info">{{ product.size }}</span>
+                                <span class="badge bg-info">{{ product.color }}</span>
+                                <span class="badge bg-info">{{ product.style }}</span>
+                                <span class="badge bg-info">{{ product.season }}</span>
+                            </div>
+                            {% if not product.in_stock %}
+                            <div class="alert alert-warning mb-3">Out of Stock</div>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer">
+                            {% if session.get('authenticated') and product.in_stock %}
+                            <button class="btn btn-primary w-100 add-to-cart" data-product-id="{{ product.id }}">
+                                Add to Cart
+                            </button>
+                            {% elif not session.get('authenticated') %}
+                            <a href="{{ url_for('auth.login', next=url_for('cart.view_cart')) }}" class="btn btn-primary w-100">
+                                Login to Add to Cart
+                            </a>
+                            {% else %}
+                            <button class="btn btn-secondary w-100" disabled>Out of Stock</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </div>
 
+{% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Add to cart functionality
     document.querySelectorAll('.add-to-cart').forEach(button => {
         button.addEventListener('click', async function() {
             const productId = this.dataset.productId;
@@ -63,7 +211,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     const data = await response.json();
                     location.reload();
                 } else if (response.status === 401) {
-                    // Redirect to login if unauthorized
                     window.location.href = "{{ url_for('auth.login', next=url_for('cart.view_cart')) }}";
                 }
             } catch (error) {
@@ -71,6 +218,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Auto-submit form when filters change
+    document.querySelectorAll('#filter-form input').forEach(input => {
+        input.addEventListener('change', () => {
+            document.getElementById('filter-form').submit();
+        });
+    });
 });
 </script>
+{% endblock %}
 {% endblock %} 

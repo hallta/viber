@@ -35,9 +35,9 @@ coverage.xml
 coverage/
 
 # Database
-*.db
-*.sqlite3
-*.sqlite
+instance/*.db
+instance/*.sqlite3
+instance/*.sqlite
 
 # Logs
 *.log
@@ -54,4 +54,37 @@ docker-compose.override.yml
 
 # OS specific
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Static files to ignore
+static/uploads/
+static/generated/
+static/temp/
+static/.webassets-cache/
+static/node_modules/
+
+# Keep these files
+!static/css/
+!static/js/
+!static/img/
+!templates/
+!src/
+
+# Application specific
+*.pyc
+.pytest_cache/
+__pycache__/
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Keep important project files
+!requirements.txt
+!README.md
+!Dockerfile
+!docker-compose.yml
+!setup.py
+!MANIFEST.in
+!pytest.ini
+!.flake8 

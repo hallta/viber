@@ -22,7 +22,7 @@ def test_products_page_accessible(client):
     """Test that products page is accessible without login."""
     response = client.get('/products')
     assert response.status_code == 200
-    assert b'Our Hat Collection' in response.data
+    assert b'Our Collection' in response.data
     assert b'Test Hat' in response.data
     assert b'$29.99' in response.data
 
