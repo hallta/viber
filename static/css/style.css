@@ -50,4 +50,92 @@ body {
 .navbar-dark .navbar-nav .nav-link.active {
     color: #ffffff; /* Full white for active link */
     font-weight: 500; /* Slightly bolder for emphasis */
+}
+
+/* Product card styles */
+.card {
+    transition: transform 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+.card-title {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+}
+
+.card-text {
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.badge {
+    padding: 0.5em 1em;
+    font-size: 0.875rem;
+}
+
+/* Price styling */
+.fs-5 {
+    font-weight: 600;
+    color: #198754;
+}
+
+/* Add to cart button */
+.card-footer {
+    background-color: transparent;
+    border-top: none;
+    padding: 1rem;
+}
+
+.btn-primary {
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+}
+
+/* Cart styles */
+.cart-item-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.quantity-input {
+    width: 80px !important;
+}
+
+/* Cart badge */
+.badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+}
+
+.badge.bg-danger {
+    font-size: 0.7rem;
+    padding: 0.25em 0.6em;
+}
+
+/* Cart button in navigation */
+.nav-link .bi-cart {
+    font-size: 1.1rem;
+}
+
+/* Flash messages */
+.alert {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.alert-dismissible .btn-close {
+    padding: 0.75rem 1rem;
 } 

@@ -6,7 +6,8 @@ Tests routing, template rendering, navigation functionality, and authentication.
 import unittest
 from flask import template_rendered, session
 from contextlib import contextmanager
-from main import app
+from main import app, db, Product, CartItem
+import json
 
 
 @contextmanager
@@ -39,6 +40,27 @@ class TestViberApp(unittest.TestCase):
         self.client = app.test_client()
         self.app.config['TESTING'] = True
         self.app.config['WTF_CSRF_ENABLED'] = False  # Disable CSRF for testing
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        
+        with self.app.app_context():
+            # Create all tables
+            db.create_all()
+            
+            # Add test product
+            test_product = Product(
+                name='Test Hat',
+                description='A test hat',
+                price=29.99,
+                image_url='https://test.com/hat.jpg',
+                category='Test'
+            )
+            db.session.add(test_product)
+            db.session.commit()
+
+    def tearDown(self):
+        with self.app.app_context():
+            db.session.remove()
+            db.drop_all()
         
     def login(self, username='testuser', password='testpass'):
         """Helper method to log in a test user."""
@@ -202,6 +224,268 @@ class TestViberApp(unittest.TestCase):
         data = response.data.decode()
         self.assertIn('nav-link active', data)
         self.assertIn('aria-current="page"', data)
+
+    def test_products_page_accessible(self):
+        """Test that products page is accessible without login"""
+        response = self.client.get('/products')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Our Hat Collection', response.data)
+        self.assertIn(b'Test Hat', response.data)
+        self.assertIn(b'$29.99', response.data)
+
+    def test_products_in_database(self):
+        """Test that products can be retrieved from database"""
+        with self.app.app_context():
+            products = Product.query.all()
+            self.assertTrue(len(products) > 0)
+            self.assertEqual(products[0].name, 'Test Hat')
+            self.assertEqual(products[0].price, 29.99)
+
+    def test_products_page_content(self):
+        """Test that products page displays all required elements"""
+        response = self.client.get('/products')
+        self.assertIn(b'card-img-top', response.data)  # Image element
+        self.assertIn(b'card-title', response.data)    # Title element
+        self.assertIn(b'card-text', response.data)     # Description element
+        self.assertIn(b'badge', response.data)         # Category badge
+        self.assertIn(b'Add to Cart', response.data)   # Add to cart button
+
+    def test_navigation_includes_products(self):
+        """Test that navigation bar includes products link"""
+        response = self.client.get('/about')  # Use public page instead of home
+        self.assertIn(b'href="/products"', response.data)
+        self.assertIn(b'Products', response.data)
+
+    def test_add_to_cart(self):
+        """Test adding a product to cart"""
+        self.login()  # Log in first
+        
+        with self.app.app_context():
+            # Get the test product ID
+            product = Product.query.first()
+            
+            # Add to cart
+            response = self.client.post(f'/cart/add/{product.id}')
+            self.assertEqual(response.status_code, 200)
+            data = json.loads(response.data)
+            self.assertEqual(data['cart_count'], 1)
+            
+            # Verify item in cart
+            cart_item = CartItem.query.first()
+            self.assertIsNotNone(cart_item)
+            self.assertEqual(cart_item.product_id, product.id)
+            self.assertEqual(cart_item.quantity, 1)
+
+    def test_update_cart_quantity(self):
+        """Test updating cart item quantity"""
+        self.login()  # Log in first
+        
+        with self.app.app_context():
+            # Add item to cart first
+            product = Product.query.first()
+            self.client.post(f'/cart/add/{product.id}')
+            cart_item = CartItem.query.first()
+            
+            # Update quantity
+            response = self.client.post(
+                f'/cart/update/{cart_item.id}',
+                json={'quantity': 3},
+                content_type='application/json'
+            )
+            self.assertEqual(response.status_code, 200)
+            
+            # Verify quantity updated
+            cart_item = CartItem.query.first()
+            self.assertEqual(cart_item.quantity, 3)
+
+    def test_remove_from_cart(self):
+        """Test removing item from cart"""
+        self.login()  # Log in first
+        
+        with self.app.app_context():
+            # Add item to cart first
+            product = Product.query.first()
+            self.client.post(f'/cart/add/{product.id}')
+            cart_item = CartItem.query.first()
+            
+            # Remove item
+            response = self.client.post(f'/cart/remove/{cart_item.id}')
+            self.assertEqual(response.status_code, 200)
+            
+            # Verify item removed
+            cart_item = CartItem.query.first()
+            self.assertIsNone(cart_item)
+
+    def test_view_cart_page(self):
+        """Test viewing the cart page"""
+        self.login()  # Log in first
+        
+        with self.app.app_context():
+            # Add item to cart first
+            product = Product.query.first()
+            self.client.post(f'/cart/add/{product.id}')
+            
+            # View cart
+            response = self.client.get('/cart')
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b'Shopping Cart', response.data)
+            self.assertIn(product.name.encode(), response.data)
+            self.assertIn(str(product.price).encode(), response.data)
+
+    def test_cart_session_isolation(self):
+        """Test that cart items are session-specific"""
+        self.login(username='user1')  # Log in first user
+        
+        with self.app.app_context():
+            product = Product.query.first()
+            
+            # Add item in first session
+            self.client.post(f'/cart/add/{product.id}')
+            
+            # Create new client and log in as different user
+            client2 = app.test_client()
+            with client2.session_transaction() as sess:
+                sess['authenticated'] = True
+                sess['username'] = 'user2'
+            
+            # Check second user's cart
+            response = client2.get('/cart')
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(b'Your cart is empty', response.data)
+
+    def test_cart_requires_auth(self):
+        """Test that cart operations require authentication"""
+        with self.app.app_context():
+            # Get the test product ID
+            product = Product.query.first()
+            
+            # Try to view cart without auth
+            response = self.client.get('/cart')
+            self.assertEqual(response.status_code, 302)  # Redirects to login
+            self.assertIn('/login', response.location)
+            
+            # Try to add to cart without auth
+            response = self.client.post(f'/cart/add/{product.id}')
+            self.assertEqual(response.status_code, 302)  # Redirects to login
+            self.assertIn('/login', response.location)
+            
+            # Try to update cart without auth
+            response = self.client.post('/cart/update/1', json={'quantity': 2})
+            self.assertEqual(response.status_code, 302)  # Redirects to login
+            self.assertIn('/login', response.location)
+            
+            # Try to remove from cart without auth
+            response = self.client.post('/cart/remove/1')
+            self.assertEqual(response.status_code, 302)  # Redirects to login
+            self.assertIn('/login', response.location)
+
+    def test_cart_operations_with_auth(self):
+        """Test cart operations when authenticated"""
+        self.login()  # Log in first
+        
+        with self.app.app_context():
+            # Get the test product
+            product = Product.query.first()
+            
+            # Add to cart
+            response = self.client.post(f'/cart/add/{product.id}')
+            self.assertEqual(response.status_code, 200)
+            data = json.loads(response.data)
+            self.assertEqual(data['cart_count'], 1)
+            
+            # View cart
+            response = self.client.get('/cart')
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(product.name.encode(), response.data)
+            
+            # Update quantity
+            cart_item = CartItem.query.first()
+            response = self.client.post(
+                f'/cart/update/{cart_item.id}',
+                json={'quantity': 3},
+                content_type='application/json'
+            )
+            self.assertEqual(response.status_code, 200)
+            
+            # Verify quantity updated
+            cart_item = CartItem.query.first()
+            self.assertEqual(cart_item.quantity, 3)
+            
+            # Remove from cart
+            response = self.client.post(f'/cart/remove/{cart_item.id}')
+            self.assertEqual(response.status_code, 200)
+            self.assertIsNone(CartItem.query.first())
+
+    def test_cart_cleared_on_logout(self):
+        """Test that cart items are cleared when user explicitly logs out with cart clearing"""
+        self.login()
+        
+        with self.app.app_context():
+            # Add item to cart
+            product = Product.query.first()
+            self.client.post(f'/cart/add/{product.id}')
+            
+            # Verify item in cart
+            self.assertIsNotNone(CartItem.query.first())
+            
+            # Logout with cart clearing
+            response = self.client.get('/logout/clear-cart')
+            self.assertEqual(response.status_code, 302)  # Should redirect
+            
+            # Verify cart is empty
+            self.assertIsNone(CartItem.query.first())
+
+    def test_cart_persists_on_regular_logout(self):
+        """Test that cart items persist when user logs out normally"""
+        self.login()
+        
+        with self.app.app_context():
+            # Add item to cart
+            product = Product.query.first()
+            self.client.post(f'/cart/add/{product.id}')
+            
+            # Verify item in cart
+            cart_item = CartItem.query.first()
+            self.assertIsNotNone(cart_item)
+            
+            # Regular logout
+            self.client.get('/logout')
+            
+            # Verify cart item still exists
+            persisted_item = CartItem.query.first()
+            self.assertIsNotNone(persisted_item)
+            self.assertEqual(persisted_item.id, cart_item.id)
+
+    def test_cart_isolation_between_users(self):
+        """Test that cart items are isolated between different users"""
+        with self.app.app_context():
+            product = Product.query.first()
+            
+            # First user adds item
+            self.login(username='user1')
+            self.client.post(f'/cart/add/{product.id}')
+            
+            # Verify first user's cart
+            cart_items = CartItem.query.filter_by(session_id='user1').all()
+            self.assertEqual(len(cart_items), 1)
+            self.assertEqual(cart_items[0].product_id, product.id)
+            
+            # Switch to second user (using regular logout to preserve cart items)
+            self.client.get('/logout')
+            self.login(username='user2')
+            
+            # Add same item to second user's cart
+            self.client.post(f'/cart/add/{product.id}')
+            
+            # Verify both users have their own cart items
+            user1_items = CartItem.query.filter_by(session_id='user1').all()
+            user2_items = CartItem.query.filter_by(session_id='user2').all()
+            
+            self.assertEqual(len(user1_items), 1, "User1 should have 1 item")
+            self.assertEqual(len(user2_items), 1, "User2 should have 1 item")
+            self.assertEqual(user1_items[0].product_id, product.id)
+            self.assertEqual(user2_items[0].product_id, product.id)
+            self.assertNotEqual(user1_items[0].id, user2_items[0].id)
 
 
 if __name__ == '__main__':

@@ -1,22 +1,24 @@
 # Viber
 
-A Flask web application with authentication, navigation, and responsive design.
+A Flask web application featuring a hat store with authentication, product catalog, and responsive design.
 
 ## Features
 
 - User authentication system
 - Responsive navigation bar
-- Selective route protection
+- Product catalog with database integration
 - Bootstrap-based UI
 - Flash messages for user feedback
 - Session management
 - Mobile-friendly design
+- SQLite database for product management
 
 ## Getting Started
 
 ### Prerequisites
 - Python 3.x
 - pip (Python package installer)
+- SQLite3 (included with Python)
 
 ### Setup
 
@@ -49,17 +51,38 @@ The application implements a basic authentication system:
 
 ### Features
 - Login required for the home page
-- Public access to About and Contact pages
+- Public access to About, Contact, and Products pages
 - Session-based authentication
 - Automatic redirect to login page when accessing protected routes
 - "Remember where you came from" - redirects back to originally requested page after login
 
 ### Usage
-1. The About and Contact pages are publicly accessible
+1. The About, Contact, and Products pages are publicly accessible
 2. Visiting the home page while not logged in will redirect to the login page
 3. Enter any username and password (all credentials are accepted in this version)
 4. After login, you'll be redirected to your original destination
 5. Use the logout button in the navigation bar to end your session
+
+## Product Catalog
+
+The application includes a product catalog system for our hat store:
+
+### Features
+- SQLite database integration
+- Responsive product grid layout
+- Product categories
+- Price display
+- Product images
+- Add to cart functionality (UI only in this version)
+
+### Database Schema
+The products table includes:
+- id (Primary Key)
+- name (String)
+- description (Text)
+- price (Float)
+- image_url (String)
+- category (String)
 
 ## Testing
 
@@ -115,11 +138,13 @@ viber/
 ├── README.md               # Project documentation
 ├── requirements.txt        # Python dependencies
 ├── main.py                # Main Flask application
+├── hats.db                # SQLite database
 ├── templates/             # HTML templates directory
 │   ├── base.html         # Base template with navigation
 │   ├── index.html        # Home page template (protected)
 │   ├── about.html        # About page template (public)
 │   ├── contact.html      # Contact page template (public)
+│   ├── products.html     # Products page template (public)
 │   └── login.html        # Login page template
 ├── static/               # Static files directory
 │   └── css/             # CSS files directory
