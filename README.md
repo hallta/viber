@@ -33,6 +33,48 @@ The server will start on `http://localhost:8080`. You can visit this URL in your
 
 Note: If you see a port conflict on the default port (5000), the command above explicitly uses port 8080 to avoid conflicts with macOS AirPlay Receiver service.
 
+## Testing
+
+The project includes a comprehensive test suite using Python's unittest framework and pytest.
+
+### Running Tests
+
+Make sure you're in your virtual environment, then you can run tests using either pytest (recommended) or unittest:
+
+```bash
+# Using pytest (recommended)
+pytest
+
+# Using unittest
+python -m unittest discover tests
+```
+
+### Test Coverage
+
+The pytest configuration includes coverage reporting. When you run `pytest`, it will:
+- Run all tests with verbose output
+- Generate a coverage report
+- Show which lines aren't covered by tests
+
+### What's Being Tested
+
+The test suite includes tests for:
+- Route functionality for all pages
+- Template rendering and context
+- 404 error handling
+- Template inheritance
+- Navigation link presence
+- Active page highlighting
+- Proper template context variables
+
+### Adding New Tests
+
+New tests should be added to `tests/test_app.py` and should follow the existing pattern:
+- Use descriptive test method names starting with `test_`
+- Include docstrings explaining what is being tested
+- Group related tests in test classes
+- Use appropriate assertions for different types of checks
+
 ## Project Structure
 
 ```
@@ -45,7 +87,11 @@ viber/
 ├── static/               # Static files directory
 │   └── css/             # CSS files directory
 │       └── style.css    # Main stylesheet
-└── venv/                 # Virtual environment directory
+├── tests/               # Test suite directory
+│   ├── __init__.py     # Test package initialization
+│   └── test_app.py     # Application tests
+├── pytest.ini          # Pytest configuration
+└── venv/               # Virtual environment directory
 ```
 
 ## Contributing

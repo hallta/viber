@@ -1,3 +1,7 @@
+/* ==========================================================================
+   Base styles
+   ========================================================================== */
+
 body {
     margin: 0;
     padding: 0;
@@ -5,35 +9,45 @@ body {
     font-family: Arial, sans-serif;
 }
 
-/* Add padding to account for fixed navbar */
+/* ==========================================================================
+   Layout
+   ========================================================================== */
+
+/* Content wrapper - adds padding to prevent content from hiding under navbar */
 .content-wrapper {
-    padding-top: 70px; /* Navbar height + extra padding */
+    padding-top: 70px; /* Navbar height (56px) + additional padding */
 }
 
-/* Center the main content */
+/* Center content within containers */
 .text-center h1 {
     font-family: Arial, sans-serif;
     font-size: 48px;
     margin-top: 20vh;
 }
 
-/* Ensure navbar spans full width */
+/* ==========================================================================
+   Navigation
+   ========================================================================== */
+
+/* Navbar base styles */
 .navbar {
     width: 100%;
-    z-index: 1000;
+    z-index: 1000; /* Ensure navbar stays above other content */
 }
 
-/* Navigation link styles */
+/* Navigation link states */
 .navbar-dark .navbar-nav .nav-link {
-    color: rgba(255, 255, 255, 0.7);
-    transition: color 0.2s ease;
+    color: rgba(255, 255, 255, 0.7); /* Slightly dimmed for inactive links */
+    transition: color 0.2s ease; /* Smooth transition for hover effects */
 }
 
+/* Hover state */
 .navbar-dark .navbar-nav .nav-link:hover {
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.9); /* Brighter on hover */
 }
 
+/* Active state */
 .navbar-dark .navbar-nav .nav-link.active {
-    color: #ffffff;
-    font-weight: 500;
+    color: #ffffff; /* Full white for active link */
+    font-weight: 500; /* Slightly bolder for emphasis */
 } 
