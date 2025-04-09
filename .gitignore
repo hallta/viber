@@ -6,6 +6,11 @@
 !requirements.txt
 !main.py
 !README.md
+!templates/
+!templates/*.html
+!static/
+!static/css/
+!static/css/*.css
 
 # Ignore virtual environment
 venv/

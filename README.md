@@ -37,10 +37,15 @@ Note: If you see a port conflict on the default port (5000), the command above e
 
 ```
 viber/
-├── README.md           # Project documentation
-├── requirements.txt    # Python dependencies
-├── main.py            # Main Flask application
-└── venv/              # Virtual environment directory
+├── README.md               # Project documentation
+├── requirements.txt        # Python dependencies
+├── main.py                # Main Flask application
+├── templates/             # HTML templates directory
+│   └── index.html        # Main page template
+├── static/               # Static files directory
+│   └── css/             # CSS files directory
+│       └── style.css    # Main stylesheet
+└── venv/                 # Virtual environment directory
 ```
 
 ## Contributing
