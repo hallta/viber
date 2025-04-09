@@ -111,22 +111,9 @@ class TestViberApp(unittest.TestCase):
         
         self.assertIn(b'Successfully logged out!', response.data)
 
-    def test_home_page_requires_login(self):
-        """Test that home page requires authentication."""
-        # Without login
-        response = self.client.get('/')
-        self.assertEqual(response.status_code, 302)
-        self.assertIn('/login', response.location)
-        
-        # With login
-        self.login()
-        response = self.client.get('/')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Home', response.data)
-
     def test_public_pages_accessible(self):
-        """Test that about and contact pages are publicly accessible."""
-        public_routes = ['/about', '/contact']
+        """Test that public pages are accessible without authentication."""
+        public_routes = ['/', '/about', '/contact', '/products']
         
         for route in public_routes:
             # Without login
@@ -137,6 +124,7 @@ class TestViberApp(unittest.TestCase):
             self.login()
             response = self.client.get(route)
             self.assertEqual(response.status_code, 200)
+            self.logout()
 
     def test_login_redirect_to_home(self):
         """Test that login redirects to home page when no next parameter."""
@@ -146,19 +134,25 @@ class TestViberApp(unittest.TestCase):
 
     def test_login_redirect_to_next(self):
         """Test that login redirects to 'next' parameter."""
-        # Try to access protected home page
-        response = self.client.get('/')
+        # Try to access protected cart page
+        response = self.client.get('/cart')
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.location, '/login?next=/cart')
         
-        # Login with next parameter
-        response = self.client.post('/login', data=dict(
+        # Login with next parameter from the redirect URL
+        response = self.client.post('/login?next=/cart', data=dict(
             username='testuser',
             password='testpass'
-        ), follow_redirects=True)
+        ), follow_redirects=False)
         
-        # Should end up at home page
+        # Should redirect to cart page
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.location, '/cart')
+        
+        # Follow redirect to cart page
+        response = self.client.get(response.location, follow_redirects=True)
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Home', response.data)
+        self.assertIn(b'Shopping Cart', response.data)
 
     def test_navigation_shows_login_when_not_authenticated(self):
         """Test that navigation shows login link when not authenticated."""
@@ -181,16 +175,16 @@ class TestViberApp(unittest.TestCase):
 
     def test_template_inheritance(self):
         """Test that all pages properly extend the base template."""
-        # Test public pages without login
-        public_routes = ['/about', '/contact']
+        # Test all public pages without login
+        public_routes = ['/', '/about', '/contact', '/products']
         for route in public_routes:
             response = self.client.get(route)
             self.assertIn('navbar', response.data.decode())
             self.assertIn('content-wrapper', response.data.decode())
         
-        # Test home page with login
+        # Test protected cart page with login
         self.login()
-        response = self.client.get('/')
+        response = self.client.get('/cart')
         self.assertIn('navbar', response.data.decode())
         self.assertIn('content-wrapper', response.data.decode())
     
@@ -208,8 +202,10 @@ class TestViberApp(unittest.TestCase):
         """Test that the active page is properly highlighted in navigation."""
         # Test public pages
         public_routes = {
+            '/': 'home',
             '/about': 'about',
-            '/contact': 'contact'
+            '/contact': 'contact',
+            '/products': 'products'
         }
         
         for route, page in public_routes.items():
@@ -218,9 +214,9 @@ class TestViberApp(unittest.TestCase):
             self.assertIn('nav-link active', data)
             self.assertIn('aria-current="page"', data)
         
-        # Test home page (requires login)
+        # Test protected cart page
         self.login()
-        response = self.client.get('/')
+        response = self.client.get('/cart')
         data = response.data.decode()
         self.assertIn('nav-link active', data)
         self.assertIn('aria-current="page"', data)

@@ -73,9 +73,11 @@
                 
                 <!-- Cart and Authentication Links -->
                 <ul class="navbar-nav">
+                    {% if session.get('authenticated') %}
                     <li class="nav-item">
                         <a class="nav-link {% if active_page == 'cart' %}active{% endif %} position-relative" 
-                           href="{{ url_for('view_cart') }}">
+                           href="{{ url_for('view_cart') }}"
+                           {% if active_page == 'cart' %}aria-current="page"{% endif %}>
                             <i class="bi bi-cart"></i> Cart
                             {% if cart_count > 0 %}
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
@@ -84,21 +86,20 @@
                             {% endif %}
                         </a>
                     </li>
-                    {% if session.get('authenticated') %}
-                        <li class="nav-item">
-                            <span class="nav-link">Welcome, {{ session.get('username') }}!</span>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
-                        </li>
+                    <li class="nav-item">
+                        <span class="nav-link">Welcome, {{ session.get('username') }}!</span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link {% if active_page == 'login' %}active{% endif %}" 
-                               href="{{ url_for('login') }}"
-                               {% if active_page == 'login' %}aria-current="page"{% endif %}>
-                                Login
-                            </a>
-                        </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if active_page == 'login' %}active{% endif %}" 
+                           href="{{ url_for('login') }}"
+                           {% if active_page == 'login' %}aria-current="page"{% endif %}>
+                            Login
+                        </a>
+                    </li>
                     {% endif %}
                 </ul>
             </div>

@@ -104,7 +104,7 @@ def login_required(f: Callable) -> Callable:
     @wraps(f)
     def decorated_function(*args: Any, **kwargs: Any) -> Any:
         if 'authenticated' not in session:
-            return redirect(url_for('login', next=request.url))
+            return redirect(url_for('login', next=request.path))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -134,13 +134,22 @@ def login() -> Any:
         if username and password:
             session['authenticated'] = True
             session['username'] = username
-            next_page = request.args.get('next')
             flash('Successfully logged in!', 'success')
-            return redirect(next_page or url_for('home'))
+            
+            # Get next URL from form or query string
+            next_url = request.form.get('next') or request.args.get('next')
+            if next_url:
+                # Make sure we only redirect to relative URLs
+                if not next_url.startswith('/'):
+                    next_url = '/'
+                return redirect(next_url)
+            return redirect(url_for('home'))
         
         flash('Please provide both username and password', 'error')
     
-    return render_template_with_nav('login.html', active_page='login')
+    # Get the next parameter from the query string for the form
+    next_url = request.args.get('next', '')
+    return render_template_with_nav('login.html', active_page='login', next=next_url)
 
 @app.route('/logout')
 def logout() -> Any:
@@ -164,7 +173,6 @@ def logout_and_clear_cart() -> Any:
     return redirect(url_for('login'))
 
 @app.route('/')
-@login_required
 def home() -> str:
     """Render the home page."""
     return render_template_with_nav('index.html', active_page='home')
@@ -204,12 +212,10 @@ def view_cart():
     """Render the cart page"""
     cart_items = CartItem.query.filter_by(session_id=session.get('username')).all()
     total = sum(item.product.price * item.quantity for item in cart_items)
-    cart_count = get_cart_count()
-    return render_template('cart.html', 
+    return render_template_with_nav('cart.html', 
                          cart_items=cart_items, 
                          total=total, 
-                         active_page='cart',
-                         cart_count=cart_count)
+                         active_page='cart')
 
 @app.route('/cart/add/<int:product_id>', methods=['POST'])
 @login_required
